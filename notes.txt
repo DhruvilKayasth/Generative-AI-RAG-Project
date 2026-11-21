@@ -1,0 +1,253 @@
+RAG + AI PROJECT NOTES
+
+1. ARTIFICIAL INTELLIGENCE (AI)
+
+Artificial Intelligence (AI) is the field of building systems that
+perform tasks that normally require human intelligence, such as
+understanding language, recognizing patterns, reasoning, and making
+predictions.
+
+Machine Learning (ML): - A subset of AI. - Models learn patterns from
+data to make predictions or decisions.
+
+Deep Learning (DL): - A subset of ML that uses neural networks with
+multiple layers. - Commonly used for images, speech, and language tasks.
+
+Generative AI: - AI that generates new content such as text, images,
+code, or audio. - Large Language Models (LLMs), such as Gemini, generate
+text from prompts.
+
+LLM: - A model trained on large amounts of text to understand and
+generate language. - It generates answers based on its learned patterns
+and the context supplied in the prompt. - An LLM may not know private
+documents or the latest information unless that information is provided
+or retrieved.
+
+2. WHAT IS RAG?
+
+RAG stands for Retrieval-Augmented Generation.
+
+RAG is a technique in which an application retrieves relevant
+information from external data (such as PDFs or databases) and provides
+that information to an LLM as context before the LLM generates an
+answer.
+
+Why use RAG? - Answer questions using private or organization-specific
+documents. - Ground answers in retrieved information. - Update the
+knowledge source without retraining the LLM. - Potentially reduce
+unsupported answers by supplying relevant context.
+
+RAG does NOT normally retrain or change the LLM’s model weights.
+
+3. RAG WORKFLOW
+
+A. INDEXING PHASE (prepare documents) 1. Load documents: Read source
+files such as PDF, TXT, or DOCX. 2. Extract text: Convert document
+contents into text. 3. Chunking: Split long text into smaller,
+manageable pieces called chunks. 4. Embeddings: Convert each chunk into
+a numerical vector that represents its semantic meaning. 5. Store: Save
+the vectors and their associated text/metadata in a vector database,
+such as ChromaDB.
+
+B. QUERY PHASE (answer a question) 1. User asks a question. 2. Convert
+the question into an embedding using the same embedding model. 3.
+Retriever searches the vector database for similar chunks. 4. Add the
+retrieved chunks to the prompt as context. 5. Send the context and user
+question to the LLM (Gemini). 6. Display the generated answer, ideally
+with source information.
+
+Simple flow: Documents -> Load -> Split into chunks -> Embeddings ->
+ChromaDB User question -> Question embedding -> Retrieve relevant chunks
+Retrieved chunks + question -> Gemini -> Answer
+
+4. IMPORTANT RAG CONCEPTS
+
+Document: - The source content loaded into the application.
+
+Chunk: - A smaller section of a document. - Chunking makes retrieval
+more focused and avoids sending a huge document every time a question is
+asked.
+
+Chunk size: - The approximate amount of text in each chunk. - Small
+chunks can be precise but may lose context. - Large chunks preserve
+context but may retrieve unrelated information.
+
+Chunk overlap: - Text repeated between neighboring chunks. - Helps
+preserve information that might otherwise be split across a boundary.
+
+Embedding: - A numerical vector representing the meaning of text. -
+Similar meanings often have vectors that are close in vector space.
+
+Embedding model: - The model that converts text into vectors. - Use the
+same compatible embedding model for indexing documents and embedding
+user questions.
+
+Vector database: - Stores embeddings and associated text/metadata. -
+Supports similarity search. - Examples: ChromaDB, FAISS, Pinecone, and
+vector search in Supabase.
+
+Similarity search: - Finds stored vectors that are closest to the
+question vector. - It is used to retrieve potentially relevant chunks.
+
+Retriever: - The component that searches the vector store and returns
+relevant documents.
+
+Context: - The retrieved text supplied to the LLM along with the user’s
+question.
+
+Prompt: - The instructions and input sent to the LLM.
+
+Hallucination: - An answer that sounds convincing but is incorrect or
+unsupported. - RAG can help by supplying relevant sources, but it does
+not guarantee that every answer will be correct.
+
+Metadata: - Extra information stored with a chunk, such as source
+filename, page number, document ID, or section name. - Metadata can help
+filter results and show citations.
+
+Top-k: - The number of retrieved chunks returned by a search. - Example:
+top-k = 4 means retrieve four candidate chunks.
+
+4.1 RETRIEVAL QUALITY
+
+Good retrieval is essential for good RAG answers.
+
+Ways to improve retrieval: - Use meaningful chunk sizes and overlap. -
+Use an appropriate embedding model. - Retrieve a suitable number of
+chunks (top-k). - Add metadata filters when needed. - Try keyword +
+vector (hybrid) search when semantic search alone is not enough. -
+Evaluate whether the retrieved chunks actually answer the question.
+
+If retrieval returns irrelevant text, the LLM may produce an irrelevant
+answer.
+
+5. TECHNOLOGIES IN THIS PROJECT
+
+Python: - Main programming language used to build the application.
+
+uv: - Python project and package manager. - uv venv creates a virtual
+environment. - uv add package-name adds a dependency to the project. -
+uv run main.py runs a Python file in the project environment. -
+uv pip install -r requirements.txt installs packages from
+requirements.txt.
+
+Google Gemini API: - Provides access to Gemini models for text
+generation. - The application sends the question and retrieved context
+to Gemini. - Keep the API key private.
+
+LangChain: - A framework/library for connecting components in an LLM
+application. - Can help with document loading, text splitting,
+embeddings, retrievers, vector stores, and model integrations.
+
+ChromaDB: - A vector database that stores embeddings, text, and
+metadata. - Can perform similarity search to retrieve relevant document
+chunks. - Can persist a collection locally so it can be reused between
+runs.
+
+Sentence Transformers: - A library for creating text embeddings using
+pretrained models. - Can generate embeddings locally, depending on the
+selected model. - The same embedding model should be used for document
+chunks and queries.
+
+Streamlit: - A Python framework for building a simple web interface. -
+Can provide PDF upload, a chat input, and answer display.
+
+PyPDF: - A Python package for extracting text from PDF files.
+
+python-dotenv: - Loads environment variables from a .env file.
+
+6. PROJECT FILES AND THEIR RESPONSIBILITIES
+
+.env: - Stores secrets such as GEMINI_API_KEY. - Never upload this file
+to GitHub.
+
+.gitignore: - Lists files and folders Git should ignore. - Common
+entries: .env .venv/ pycache/ chroma_db/
+
+requirements.txt: - Lists Python packages required by the project.
+
+loader.py: - Loads documents and extracts their text.
+
+chunking.py: - Splits loaded documents into chunks.
+
+embeddings.py: - Initializes and uses the embedding model.
+
+vectorstore.py: - Creates or loads the ChromaDB collection. - Adds
+chunks and performs similarity searches.
+
+rag_pipeline.py: - Connects retrieval with the Gemini generation step.
+
+main.py: - Entry point for running or testing the application.
+
+7. IMPORTANT SECURITY AND RELIABILITY PRACTICES
+
+-   Never hardcode API keys in Python source code.
+-   Read the key from an environment variable, for example
+    GEMINI_API_KEY.
+-   Never commit .env to GitHub.
+-   Do not print the actual API key in logs or terminal output.
+-   Handle missing API keys and API errors clearly.
+-   Check Gemini model availability and API quota.
+-   Do not assume every generated answer is correct.
+-   If retrieved context does not contain the answer, instruct the model
+    to say that the information was not found in the supplied documents.
+-   Show the source filename or page where possible.
+-   Validate uploaded files and handle empty or scanned PDFs
+    appropriately.
+-   Scanned PDFs may require OCR because they may not contain selectable
+    text.
+
+8. EXAMPLE RAG PROMPT
+
+Use the following pattern when sending retrieved context to an LLM:
+
+“You are an assistant that answers questions using only the context
+below.
+
+Context: {retrieved_context}
+
+Question: {user_question}
+
+Instructions: - Answer using the supplied context. - If the context does
+not contain the answer, say you could not find it in the provided
+documents. - Do not invent facts. - Keep the answer clear and concise.”
+
+9. BASIC TROUBLESHOOTING
+
+API key not found: - Check that .env is in the project directory. -
+Check that the variable is named GEMINI_API_KEY. - Load it using
+python-dotenv before reading it.
+
+Authentication or API error: - Check that the key is valid and active. -
+Check that the API key is being passed to the Gemini client. - Check the
+provider’s current API and model availability.
+
+Quota or rate-limit error: - Check the provider’s usage limits and
+billing settings. - Reduce request frequency and avoid unnecessary
+repeated calls.
+
+No PDF text extracted: - Check whether the PDF contains selectable
+text. - If it is scanned, use an OCR process.
+
+Poor answers: - Inspect the retrieved chunks first. - Check chunk size,
+overlap, embedding model, and top-k. - Improve the prompt and retrieval
+strategy.
+
+ChromaDB returns no results: - Confirm documents were added
+successfully. - Confirm the correct persistent directory and collection
+are being loaded. - Confirm query embeddings use the same embedding
+model as stored vectors.
+
+10. QUICK GLOSSARY
+
+AI = Artificial Intelligence ML = Machine Learning DL = Deep Learning
+LLM = Large Language Model RAG = Retrieval-Augmented Generation PDF =
+Portable Document Format API = Application Programming Interface SDK =
+Software Development Kit Vector = A list of numbers representing data in
+a vector space Embedding= Numerical representation of text meaning Chunk
+= A smaller piece of a document Retriever= Component that searches for
+relevant chunks Context = Retrieved information supplied to the LLM
+Prompt = Instructions and input sent to the LLM OCR = Optical Character
+Recognition
+
+END OF NOTES

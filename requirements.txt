@@ -1,0 +1,27 @@
+
+# Gemini API
+google-genai
+langchain-google-genai
+
+# LangChain Framework
+langchain
+langchain-community
+langchain-text-splitters
+langchain-chroma
+langchain-huggingface
+
+# Vector Database
+chromadb
+
+# Embeddings
+sentence-transformers
+
+# Document Processing
+pypdf
+python-docx
+
+# Environment Variables
+python-dotenv
+
+# Frontend
+streamlit
